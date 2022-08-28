@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script type="text/javascript" src='../js/xlsx.core.min.js'></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: "microsoft YaHei";
+        }
+
+        html {
+            height: 100%;
+        }
+
+        body {
+            height: 100%;
+            background-image: linear-gradient(to right, #fbc2eb, #a6c1ee);
+        }
+
+        .login-wrapper {
+            display: flex;
+            flex-direction: column;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            align-content: center;
+            background-color: #fff;
+            width: 70%;
+            height: 85%;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 15px;
+        }
+
+        .header {
+            flex: 2;
+            font-size: 38px;
+            font-weight: bold;
+            margin: 0 auto;
+        }
+
+        .btn {
+            text-align: center;
+            width: 100%;
+            background-image: linear-gradient(to right, #a6c1ee, #fbc2eb);
+            color: #fff;
+        }
+
+        .recordShow {
+            flex: 8;
+            width: 90%;
+            flex-basis: 15%;
+            margin: 0 auto;
+            background-color: rgb(254, 250, 251);
+            margin-bottom: 1%;
+            font-size: 18px;
+            resize: none;
+            outline: none;
+        }
+
+        .commentShow {
+            flex: 0.5;
+            width: 90%;
+            flex-basis: 15%;
+            margin: 0 auto;
+            background-color: rgb(255, 243, 245);
+            margin-bottom: 1%;
+            font-size: 18px;
+            resize: none;
+            outline: none;
+        }
+
+        .commentPut {
+            flex: 2;
+            height: 15%;
+            width: 90.5%;
+            margin: 0 auto;
+            margin-bottom: 2%;
+            display: flex;
+            justify-content: center;
+        }
+
+        #comments {
+            flex: 9;
+            border-radius: 5px;
+            font-size: 18px;
+            outline: none;
+        }
+
+        .release {
+            flex: 1;
+            background-image: linear-gradient(to right, #a6c1ee, #fbc2eb);
+            color: #fff;
+            font-size: 30px;
+        }
+
+        .getBack {
+            position: absolute;
+            text-decoration: none;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            left: 0.3%;
+            top: 0.3%;
+            border-radius: 5px;
+            width: 5%;
+            height: 5%;
+            color: azure;
+            background-color: #a6c1ee;
+        }
+
+        .clearAllRecord {
+            flex: 1.5;
+            font-size: 20px;
+            width: 90%;
+            margin: 0 auto;
+            background-color: rgb(248, 194, 194);
+        }
+
+        .clearAllNote {
+            flex: 1.5;
+            font-size: 20px;
+            width: 90%;
+            margin: 0 auto;
+            background-color: rgb(248, 194, 194);
+        }
+    </style>
+</head>
+
+<body>
+    <a href="../主页.html" class="getBack">返回主页</a>
+    <div class="login-wrapper">
+        <div class="header">历史记录</div>
+        <button class="clearAllRecord">清除所有备注和历史记录</button>
+        <textarea class="recordShow" readonly="readonly" placeholder="这里会显示历史记录"></textarea>
+        <textarea class="commentShow" readonly="readonly" placeholder="这里会显示备注"></textarea>
+        <!-- <button class="clearAllNote">清除所有备注</button> -->
+        <div class="commentPut">
+            <textarea id="comments" cols="30" rows="10" placeholder="这里可以写备注" resize:none></textarea>
+            <button class="release" onclick="releaseNote()">发表</button>
+        </div>
+    </div>
+    <script>
+        function time() {//考虑把时间函数封装
+            var vWeek, vWeek_s, vDay;
+            vWeek = ["星期天", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+            var date = new Date();
+            year = date.getFullYear();
+            month = date.getMonth() + 1;
+            day = date.getDate();
+            hours = date.getHours();
+            minutes = date.getMinutes();
+            seconds = date.getSeconds();
+            vWeek_s = date.getDay();
+            let currentTime = year + "年" + month + "月" + day + "日" + " " + hours + ":" + minutes + ":" + seconds + "\t" + vWeek[vWeek_s]
+            return currentTime
+        };
+        var clearAllRecord = document.querySelector('.clearAllRecord')
+        var clearAllNote = document.querySelector('.clearAllNote')
+        var submit = document.querySelector(".release")
+        var comments = document.querySelector("#comments")
+        var commentShow = document.querySelector(".commentShow")
+        var recordShow = document.querySelector('.recordShow')
+        var recordText = ''
+        var noteText = ''
+        for (let i = 0; i < localStorage.length; i++) {
+            var getKey = localStorage.key(i)
+            if (getKey.indexOf('fileName') >= 0) {
+                let getRecord = localStorage.getItem(getKey)
+                recordText += getRecord + '\n'
+                // console.log(recordText);
+            }
+            if (getKey.indexOf('note') >= 0) {
+                let getNote = localStorage.getItem(getKey)
+                noteText += getNote
+                // console.log(noteText);
+            }
+        }
+        recordShow.value = recordText
+        commentShow.value = noteText
+        clearAllRecord.addEventListener('click', () => {
+            localStorage.clear()
+            recordText = ''
+            noteText = ''
+            recordShow.value = ''
+            commentShow.value = ''
+        })
+        function releaseNote() {
+            if (comments.value == 0) {
+                alert('未输入文字')
+            } else {
+                noteText += time() + '   ' + comments.value + '\n'
+                let storageName = 'note'
+                localStorage.setItem(storageName + time(), time() + '   ' + comments.value + '\n');
+                commentShow.value = noteText
+                comments.value = ''
+            }
+        }
+    </script>
+</body>
+
+</html>
